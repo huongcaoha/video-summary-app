@@ -3,7 +3,7 @@ import google.generativeai as genai
 import os
 import time
 import tempfile
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 # Cấu hình giao diện Streamlit
 st.set_page_config(page_title="Công cụ tóm tắt Video với Gemini", page_icon="🎥", layout="centered")
 
