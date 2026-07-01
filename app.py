@@ -46,8 +46,8 @@ if uploaded_file is not None:
                 audio_file_descriptor, temp_audio_path = tempfile.mkstemp(suffix=".mp3")
                 os.close(audio_file_descriptor) # Đóng để moviepy có quyền ghi vào file
                 
-                # Ghi file audio
-                video_clip.audio.write_audiofile(temp_audio_path, logger=None)
+                # Ghi file audio với chất lượng cao (bitrate 320k)
+                video_clip.audio.write_audiofile(temp_audio_path, bitrate="320k", logger=None)
                 video_clip.close()
                 
             except Exception as e:
@@ -75,7 +75,53 @@ if uploaded_file is not None:
                     # Sử dụng mô hình gemini-2.5-flash
                     model = genai.GenerativeModel(model_name="models/gemini-2.5-flash")
                     
-                    prompt = "Hãy nghe kỹ toàn bộ đoạn âm thanh này và cung cấp một bản tóm tắt thật chi tiết bằng tiếng Việt về những nội dung chính."
+                    prompt = """Hãy nghe kỹ toàn bộ đoạn âm thanh cuộc họp này và tóm tắt nội dung thật chi tiết.
+ĐIỀU KIỆN BẮT BUỘC: Bạn PHẢI xuất kết quả đầu ra tuân thủ nghiêm ngặt theo CẤU TRÚC VÀ ĐỊNH DẠNG (FORMAT) dưới đây. Hãy điền các thông tin bạn nghe được vào các mục tương ứng. Nếu mục nào hoặc người nào không được nhắc đến, hãy bỏ qua hoặc ghi "Không có thông tin". 
+
+MẪU ĐỊNH DẠNG YÊU CẦU:
+NGÀY [Ngày tháng năm diễn ra cuộc họp - lấy từ audio nếu có]
+I. BÁO CÁO TIẾN ĐỘ & TÌNH HÌNH CÁC BỘ PHẬN
+1. Công nghệ thông tin (CNTT)
+- [Tên các chương trình / cơ sở / người phụ trách]:
+  - [Tiến độ / Tình hình...]
+  - [Vấn đề / Khó khăn...]
+  - [Hạn chốt xử lý...]
+2. Quản trị kinh doanh số (QTKDS)
+- Kết quả đạt được: 
+  - [Nội dung...]
+- Vấn đề tồn tại: 
+  - [Nội dung...]
+3. Ngoại ngữ
+- Tiếng Anh: 
+  - [Nội dung...]
+- Tiếng Nhật: 
+  - [Nội dung...]
+4. Kỹ năng mềm
+- [Nội dung...]
+5. Quản lý chỉ số đào tạo
+- [Nội dung...]
+6. Quản lý đào tạo & Khảo thí
+- Quản lý lớp: [Nội dung...]
+- Khảo thí: [Nội dung...]
+- Tồn đọng: [Nội dung...]
+
+II. Ý KIẾN CHỈ ĐẠO CỦA CHỦ TRÌ
+1. Cấu trúc báo cáo giao ban: [Nội dung...]
+2. Nhân sự & Quy chuẩn giảng dạy: [Nội dung...]
+3. Quản lý vận hành & Kỷ luật: [Nội dung...]
+4. Định lượng thời gian học tập: [Nội dung...]
+5. Khung thưởng phạt: [Nội dung...]
+6. Kế hoạch mở rộng cơ sở: [Nội dung...]
+7. Chỉ thị khẩn: [Nội dung...]
+
+III. TỔNG HỢP DANH SÁCH ĐẦU VIỆC VÀ HẠN CHỐT THỰC HIỆN TRONG TUẦN
+1. Hạn chốt khẩn cấp đầu tuần
+- [Nội dung...]
+2. Hạn chốt theo ngày trong tuần
+- [Nội dung...]
+3. Các tác vụ duy trì và giám sát thường xuyên trong tuần
+- [Nội dung...]
+"""
                     
                     response = model.generate_content([media_file, prompt],
                                                       request_options={"timeout": 600}) # Đặt timeout cao cho audio dài
